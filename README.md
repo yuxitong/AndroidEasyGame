@@ -12,3 +12,10 @@
 
 
 如果你很喜欢自定义View 或者想学习这方面的 可以来看看本项目
+
+
+
+项目展示：
+![image](https://github.com/yuxitong/AndroidEasyGame/blob/master/image/1.jpg) 
+
+![image](https://github.com/yuxitong/AndroidEasyGame/blob/master/image/2.jpg) 
