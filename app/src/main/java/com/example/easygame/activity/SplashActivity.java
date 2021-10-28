@@ -58,10 +58,21 @@ public class SplashActivity extends AppCompatActivity {
 
     public void onClick(View view) {
         switch (view.getId()){
-            case R.id.oneButton:
+            case R.id.oneButton: {
                 Intent intent = new Intent(this, OneActivity.class);
                 startActivity(intent);
                 break;
+            }
+            case R.id.twoButton: {
+                Intent intent = new Intent(this, TwoActivity.class);
+                startActivity(intent);
+                break;
+            }
+            case R.id.AIBodyButton: {
+                Intent intent = new Intent(this, AITestActivity.class);
+                startActivity(intent);
+                break;
+            }
         }
 
     }

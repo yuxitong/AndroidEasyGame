@@ -12,7 +12,7 @@ import android.util.Log;
 import android.view.TextureView;
 
 import com.example.easygame.R;
-import com.example.easygame.view.oneGame.LeapGameView;
+import com.example.easygame.view.onegame.LeapGameView;
 
 import java.io.IOException;
 import java.util.List;
@@ -29,7 +29,7 @@ public class OneActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_one);
         tv = findViewById(R.id.tv);
 
         leapGameView = findViewById(R.id.faceView);

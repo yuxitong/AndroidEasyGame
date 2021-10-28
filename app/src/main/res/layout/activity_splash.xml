@@ -15,5 +15,19 @@
         android:text="第一个游戏"
         android:onClick="onClick"
         />
+    <Button
+        android:id="@+id/twoButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="第二个游戏"
+        android:onClick="onClick"
+        />
+    <Button
+        android:id="@+id/AIBodyButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="AI体感测试"
+        android:onClick="onClick"
+        />
 
 </LinearLayout>
