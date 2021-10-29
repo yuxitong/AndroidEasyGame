@@ -10,6 +10,7 @@ import android.hardware.Camera;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.TextureView;
+import android.widget.ImageView;
 
 import com.example.easygame.R;
 import com.example.easygame.view.onegame.LeapGameView;
@@ -88,7 +89,6 @@ public class OneActivity extends AppCompatActivity {
                                 RectF rect = new RectF();
 
                                 matrix1.mapRect(rect, new RectF(faces[0].rect));
-
 
 
                                 Log.e("ksksk",  " "+rect.top+"   "+rect.left);

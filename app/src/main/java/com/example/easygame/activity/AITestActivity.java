@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.util.Pair;
 import android.view.TextureView;
+import android.widget.ImageView;
 
 import com.example.easygame.R;
 import com.example.easygame.ai.BodyPart;
@@ -23,6 +24,7 @@ import com.example.easygame.ai.Constants;
 import com.example.easygame.ai.Device;
 import com.example.easygame.ai.Person;
 import com.example.easygame.ai.Posenet;
+import com.example.easygame.view.AIBodyView;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -31,36 +33,11 @@ import java.util.List;
 
 public class AITestActivity extends AppCompatActivity implements Camera.PreviewCallback {
 
-    List<Pair<BodyPart,BodyPart>> bodyJoints = new ArrayList<Pair<BodyPart,BodyPart>>(){
-        {
-            this.add(new Pair<>(BodyPart.LEFT_WRIST, BodyPart.LEFT_ELBOW));
-            this.add(new Pair<>(BodyPart.LEFT_ELBOW, BodyPart.LEFT_SHOULDER));
-            this.add(new Pair<>(BodyPart.LEFT_SHOULDER, BodyPart.RIGHT_SHOULDER));
-            this.add(new Pair<>(BodyPart.RIGHT_SHOULDER, BodyPart.RIGHT_ELBOW));
-            this.add(new Pair<>(BodyPart.RIGHT_ELBOW, BodyPart.RIGHT_WRIST));
-            this.add(new Pair<>(BodyPart.LEFT_SHOULDER, BodyPart.LEFT_HIP));
-            this.add(new Pair<>(BodyPart.LEFT_HIP, BodyPart.RIGHT_HIP));
-            this.add(new Pair<>(BodyPart.RIGHT_HIP, BodyPart.RIGHT_SHOULDER));
-            this.add(new Pair<>(BodyPart.LEFT_HIP, BodyPart.LEFT_KNEE));
-            this.add(new Pair<>(BodyPart.LEFT_KNEE, BodyPart.LEFT_ANKLE));
-            this.add(new Pair<>(BodyPart.RIGHT_HIP, BodyPart.RIGHT_KNEE));
-            this.add(new Pair<>(BodyPart.RIGHT_KNEE, BodyPart.RIGHT_ANKLE));
-        }
-    };
 
-    //识别概率
-    private float minConfidence = 0.5f;
-    //绘制关键点的半径
-    private float circleRadius = 8.0f;
 
     private Paint paint = new Paint();
 
     private Posenet posenet;
-
-    //预览分辨率
-    private int PREVIEW_WIDTH = 640;
-    private int PREVIEW_HEIGHT = 480;
-
 
     private String filename = "posenet_model.tflite";
     private Device device = Device.GPU;
@@ -71,6 +48,9 @@ public class AITestActivity extends AppCompatActivity implements Camera.PreviewC
     private Camera camera;
 
     private TextureView tv;
+    private AIBodyView aiBodyView;
+
+
 
     Matrix matrix1 = new Matrix();
 
@@ -86,10 +66,10 @@ public class AITestActivity extends AppCompatActivity implements Camera.PreviewC
         setContentView(R.layout.activity_ai_test);
 
         posenet = new Posenet(this,filename,device);
+        matrix1.postScale(-1, 1);
 
         tv = findViewById(R.id.tv);
-
-
+        aiBodyView = findViewById(R.id.bodyView);
         tv.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
             @Override
             public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
@@ -115,12 +95,11 @@ public class AITestActivity extends AppCompatActivity implements Camera.PreviewC
 //                parameters.setPreviewSize(size.width, size.height);
 //            else
 //                parameters.setPreviewSize(size.width, size.height);
-                    parameters.setPictureSize(1920, 1080);
-                    parameters.setPreviewSize(1920, 1080);
-
-                    matrix1.setScale(-1, 1);
-                    matrix1.postScale(1920 / 2000f, 1080 / 2000f);
-                    matrix1.postTranslate(1920 / 2f, 1080 / 2f);
+                    parameters.setPictureSize(Constants.CAMERA_WIDTH, Constants.CAMERA_HEIGHT);
+                    parameters.setPreviewSize(Constants.CAMERA_WIDTH, Constants.CAMERA_HEIGHT);
+//                    matrix1.setScale(-1, 1);
+//                    matrix1.postScale(1920 / 2000f, 1080 / 2000f);
+//                    matrix1.postTranslate(1920 / 2f, 1080 / 2f);
 
 
                     camera.setParameters(parameters);
@@ -180,27 +159,28 @@ public class AITestActivity extends AppCompatActivity implements Camera.PreviewC
 
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
-        YuvImage image = new YuvImage(data, ImageFormat.NV21, PREVIEW_HEIGHT,PREVIEW_WIDTH, null);
+        YuvImage image = new YuvImage(data, ImageFormat.NV21, Constants.CAMERA_WIDTH,Constants.CAMERA_HEIGHT, null);
         if(image!=null) {
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            image.compressToJpeg(new Rect(0, 0, PREVIEW_HEIGHT,PREVIEW_WIDTH), 80, stream);
+            image.compressToJpeg(new Rect(0, 0,Constants.CAMERA_WIDTH, Constants.CAMERA_HEIGHT), 80, stream);
+
 
             Bitmap bmp = BitmapFactory.decodeByteArray(stream.toByteArray(), 0, stream.size());
-            processImage(bmp);
-        }else{
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            //处理镜像问题
+            processImage(Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp
+                    .getHeight(), matrix1, true));
+
+//            processImage(bmp);
         }
     }
 
     private void processImage(Bitmap bitmap){
+
         Bitmap croppedBitmap = cropBitmap(bitmap);
 
         Bitmap scaledBitmap = Bitmap.createScaledBitmap(croppedBitmap, Constants.MODEL_WIDTH, Constants.MODEL_HEIGHT, true);
         Person person = posenet.estimateSinglePose(scaledBitmap);
+        aiBodyView.setPerson(person);
         Log.e("shibiejieguo",person.toString()+"   ");
     }
 
@@ -236,6 +216,8 @@ public class AITestActivity extends AppCompatActivity implements Camera.PreviewC
             );
 
         }
+
+        aiBodyView.setBoundary(croppedBitmap.getWidth(),croppedBitmap.getHeight());
         return croppedBitmap;
     }
 
